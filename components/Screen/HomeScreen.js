@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, ToastAndroid, Platform, Alert, Text } from 'react-native';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { setConnection } from '../../redux/connectionSlice';
+console.log('SET CONNECTION:', setConnection);
+
 
 export default function HomeScreen({ navigation }) {
   const [ip, setIp] = useState('');
   const [port, setPort] = useState('');
+  const dispatch = useDispatch();
 
   const showMessage = (msg) => {
     if (Platform.OS === 'android') {
@@ -24,7 +29,7 @@ export default function HomeScreen({ navigation }) {
       const response = await axios.get(`http://${ip}:${port}/`);
       if (response.data.includes("Connection success")) {
         showMessage("Connexion réussie !");
-        // Tu peux stocker l'IP/port dans Redux ici
+        dispatch(setConnection({ ip, port }));
       } else {
         showMessage("Le serveur a répondu, mais le message est inattendu.");
       }
@@ -39,7 +44,7 @@ export default function HomeScreen({ navigation }) {
       <Text style={styles.label}>Adresse IP du serveur :</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ex: 192.168.0.10"
+        placeholder="Ex: 192.168.1.18"
         value={ip}
         onChangeText={setIp}
         keyboardType="numeric"
@@ -48,7 +53,7 @@ export default function HomeScreen({ navigation }) {
       <Text style={styles.label}>Port :</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ex: 5000"
+        placeholder="Ex: 8000"
         value={port}
         onChangeText={setPort}
         keyboardType="numeric"

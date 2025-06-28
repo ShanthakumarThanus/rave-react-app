@@ -6,12 +6,12 @@ const connectionSlice = createSlice({
   name: 'connection',
   initialState,
   reducers: {
-    setConnectionInfo: (state, action) => {
+    setConnection: (state, action) => {
       state.ip = action.payload.ip;
       state.port = action.payload.port;
     },
   },
 });
 
-export const { setConnectionInfo } = connectionSlice.actions;
+export const { setConnection } = connectionSlice.actions;
 export default connectionSlice.reducer;

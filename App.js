@@ -1,32 +1,28 @@
-import 'react-native'
+import 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { React } from 'react';
+import React from 'react';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
-import HomeScreen from './components/HomeScreen';
-import RecordScreen from './components/RecordScreen';
-import RaveScreen from './components/RaveScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+import HomeScreen from './components/Screen/HomeScreen';
+import RecordScreen from './components/Screen/RecordScreen';
+import RaveScreen from './components/Screen/RaveScreen';
+
+const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
-    // <View style={styles.container}>
-    //   <Text>Open up App.js to start working on your app!</Text>
-    //   <StatusBar style="auto" />
-    // </View>
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Record" component={RecordScreen} />
-      <Tab.Screen name="RAVE" component={RaveScreen} />
-    </Tab.Navigator>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Tab.Navigator>
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Record" component={RecordScreen} />
+          <Tab.Screen name="RAVE" component={RaveScreen} />
+        </Tab.Navigator>
+        <StatusBar style="auto" />
+      </NavigationContainer>
+    </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

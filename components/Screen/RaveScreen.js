@@ -23,8 +23,10 @@ export default function RaveScreen() {
 
   const fetchModels = async () => {
     try {
+      console.log('BASE_URL utilisé :', BASE_URL);
       const res = await axios.get(`${BASE_URL}/getmodels`);
-      setModels(res.data);
+      console.log('Modèles récupérés :', res.data);
+      setModels(res.data.models);
     } catch (e) {
       Alert.alert('Erreur', 'Impossible de récupérer les modèles.');
     }
@@ -47,6 +49,8 @@ export default function RaveScreen() {
   };
 
   const sendAudio = async () => {
+    console.log('selectedAudio:', selectedAudio);
+    console.log('selectedModel:', selectedModel);
     if (!selectedAudio || !selectedModel) {
       Alert.alert('Erreur', 'Audio ou modèle manquant.');
       return;
@@ -91,7 +95,9 @@ export default function RaveScreen() {
         keyExtractor={(item) => item}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => handleSelectModel(item)} style={styles.modelButton}>
-            <Text style={item === selectedModel ? styles.modelSelected : styles.model}>{item}</Text>
+            <Text style={item === selectedModel ? styles.modelSelected : styles.model}>{item}
+              {item === selectedModel ? '✅ ' : ''}{item}
+            </Text>
           </TouchableOpacity>
         )}
       />

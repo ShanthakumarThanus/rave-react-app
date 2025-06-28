@@ -3,7 +3,7 @@ import { View, Button, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, 
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { useDispatch } from 'react-redux';
-import { addRecording } from '../redux/recordingsSlice';
+import { addRecording } from '../../redux/recordingsSlice';
 
 export default function RecordScreen() {
   const [recording, setRecording] = useState(null);
@@ -63,7 +63,7 @@ export default function RecordScreen() {
       to: newPath,
     });
 
-    dispatch(addRecording({ name: recordName, ur: newPath }));
+    dispatch(addRecording({ name: recordName, uri: newPath }));
 
     setRecordName('');
     setSound(null);
