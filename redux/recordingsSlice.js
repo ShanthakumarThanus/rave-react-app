@@ -10,8 +10,11 @@ const recordingsSlice = createSlice({
     deleteRecording: (state, action) => {
       state.list = state.list.filter(r => r.uri !== action.payload.uri);
     },
+    clearRecordings: (state) => {
+      state.list = [];
+    }
   },
 });
 
-export const { addRecording, deleteRecording } = recordingsSlice.actions;
+export const { addRecording, deleteRecording, clearRecordings } = recordingsSlice.actions;
 export default recordingsSlice.reducer;

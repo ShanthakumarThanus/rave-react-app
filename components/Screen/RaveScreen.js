@@ -4,22 +4,66 @@ import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
+import { loadRecordingsToRedux } from '../../utils/loadRecordings';
 
 export default function RaveScreen() {
   const server = useSelector((state) => state.connection);
-  const recordings = useSelector((state) => state.recordings.list); // adapt if needed
+  const recordings = useSelector((state) => state.recordings.list); 
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState(null);
   const [selectedAudio, setSelectedAudio] = useState(null);
   const [transformedUri, setTransformedUri] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
+  const isServerConfigured = server.ip && server.port; 
+  const [alertShown, setAlertShown] = useState(false);
+  const dispatch = useDispatch();
 
   const BASE_URL = `http://${server.ip}:${server.port}`;
 
   useEffect(() => {
-    fetchModels();
-  }, []);
+    if ((!server.ip || !server.port) && !alertShown) {
+      Alert.alert(
+        "Connexion requise",
+        "Veuillez d'abord renseigner l'adresse IP et le port dans l'écran d'accueil.",
+        [
+          {
+            text: "OK",
+            onPress: () => navigation.navigate('Home')
+          }
+        ]
+      );
+      setAlertShown(true);
+    }
+  }, [server.ip, server.port, alertShown]);
+
+  useEffect(() => {
+    const setup = async () => {
+      try {
+        await loadRecordingsToRedux(dispatch);
+        await fetchModels();
+      } catch (err) {
+        console.error("Erreur dans setup() : ", err);
+      }
+    }
+    if (server.ip && server.port) {
+      setAlertShown(false);
+      setup();
+    }
+  }, [server.ip, server.port]);
+
+  if (!isServerConfigured) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>Veuillez configurer la connexion dans l'écran d'accueil.</Text>
+        <Button title="Aller à l'accueil" onPress={() => navigation.navigate('Home')} />
+      </View>
+    );
+  }
+
 
   const fetchModels = async () => {
     try {
@@ -89,54 +133,66 @@ export default function RaveScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Sélection du modèle :</Text>
-      <FlatList
-        horizontal
-        data={models}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleSelectModel(item)} style={styles.modelButton}>
-            <Text style={item === selectedModel ? styles.modelSelected : styles.model}>{item}
-              {item === selectedModel ? '✅ ' : ''}{item}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
+      <View style={styles.modelsListContainer}>
+        <FlatList
+          data={models}
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => handleSelectModel(item)} style={styles.modelButton}>
+              <Text style={item === selectedModel ? styles.modelSelected : styles.model}>
+                {item === selectedModel ? '✅ ' : ''}{item}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
 
       <Text style={styles.header}>Choix du clip :</Text>
+      <View style={styles.recordingsListContainer}>
+        <FlatList
+          data={recordings}
+          keyExtractor={(item) => item.uri}
+          renderItem={({ item }) => {
+            const isSelected = selectedAudio?.uri === item.uri;
 
-      <Button title="Utiliser un son par défaut" onPress={() => {
-        setSelectedAudio({ name: 'default.wav', uri: FileSystem.bundleDirectory + 'default.wav' });
-      }} />
+            return (
+              <TouchableOpacity onPress={() => setSelectedAudio(item)} style={[styles.recordingItem, isSelected && styles.selectedRecording]}>
+                <Text style={isSelected && styles.selectedRecordingText}>{item.name}</Text>
+              </TouchableOpacity>
+            );
+          }}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>Aucun enregistrement disponible</Text>
+          }
+        />
+      </View>
 
-      <FlatList
-        data={recordings}
-        keyExtractor={(item) => item.uri}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => setSelectedAudio(item)} style={styles.recordingItem}>
-            <Text>{item.name}</Text>
-          </TouchableOpacity>
-        )}
-      />
-
-      <Button title="Choisir un fichier audio" onPress={pickFileFromDevice} />
+      <View style={styles.buttonContainer}>
+        <Button title="Choisir un fichier audio" onPress={pickFileFromDevice} />
+      </View>
 
       {selectedAudio && (
         <>
           <Text>Audio sélectionné : {selectedAudio.name}</Text>
-          <Button title="▶️ Écouter original" onPress={() => playAudio(selectedAudio.uri)} />
+          <View style={styles.buttonContainer}>
+            <Button title="▶️ Écouter original" onPress={() => playAudio(selectedAudio.uri)} />
+          </View>
         </>
       )}
 
-      <Button title="Envoyer au serveur" onPress={sendAudio} disabled={loading} />
-
-      {loading && <ActivityIndicator size="large" color="blue" />}
+      <View style={styles.buttonContainer}>
+        <Button title="Envoyer au serveur" onPress={sendAudio} disabled={loading} />
+      </View>
 
       {transformedUri && (
         <>
           <Text>Résultat transformé :</Text>
-          <Button title="▶️ Écouter transformé" onPress={() => playAudio(transformedUri)} />
+          <View style={styles.buttonContainer}>
+            <Button title="▶️ Écouter transformé" onPress={() => playAudio(transformedUri)} />
+          </View>
         </>
       )}
+
     </View>
   );
 }
@@ -148,4 +204,38 @@ const styles = StyleSheet.create({
   model: { color: 'blue' },
   modelSelected: { color: 'green', fontWeight: 'bold' },
   recordingItem: { paddingVertical: 5 },
+  emptyText: {
+    textAlign: 'center',
+    color: 'gray',
+    marginTop: 20,
+    fontStyle: 'italic',
+  },
+  modelButton: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  recordingsListContainer: {
+    maxHeight: 150,
+    marginBottom: 10,
+  },
+  modelsListContainer: {
+    maxHeight: 150, 
+    marginBottom: 10,
+  },
+  recordingItem: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  selectedRecording: {
+    backgroundColor: '#d0ebff',
+    borderRadius: 5,
+  },
+  selectedRecordingText: {
+    fontWeight: 'bold',
+    color: '#0077cc',
+  },
+  buttonContainer: {
+    marginTop: 10,
+  },
 });

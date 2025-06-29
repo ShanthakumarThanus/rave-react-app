@@ -1,33 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Button, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Button, Text, TextInput, FlatList, StyleSheet, Alert } from 'react-native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { loadRecordingsToRedux } from '../../utils/loadRecordings';
 import { addRecording } from '../../redux/recordingsSlice';
 
 export default function RecordScreen() {
   const [recording, setRecording] = useState(null);
   const [sound, setSound] = useState(null);
-  const [recordings, setRecordings] = useState([]);
+  const recordings = useSelector((state) => state.recordings.list);
   const [recordName, setRecordName] = useState('');
+  const [playbackInstance, setPlaybackInstance] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingUri, setPlayingUri] = useState(null);
   const dispatch = useDispatch();
 
   const recordingsDir = FileSystem.documentDirectory + 'recordings/';
 
   useEffect(() => {
-    // Créer le dossier au démarrage
     FileSystem.makeDirectoryAsync(recordingsDir, { intermediates: true }).catch(() => {});
-    loadRecordings();
+    loadRecordingsToRedux(dispatch);
   }, []);
-
-  const loadRecordings = async () => {
-    const files = await FileSystem.readDirectoryAsync(recordingsDir);
-    const list = files.map((file) => ({
-      name: file,
-      uri: recordingsDir + file,
-    }));
-    setRecordings(list);
-  };
 
   const startRecording = async () => {
     try {
@@ -46,7 +40,6 @@ export default function RecordScreen() {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecording(null);
-      setSound(null);
       Alert.alert('Nom du clip', 'Choisis un nom ci-dessous et appuie sur Sauvegarder.');
       setSound({ uri });
     } catch (err) {
@@ -58,26 +51,43 @@ export default function RecordScreen() {
     if (!recordName || !sound?.uri) return;
 
     const newPath = recordingsDir + recordName + '.m4a';
-    await FileSystem.moveAsync({
-      from: sound.uri,
-      to: newPath,
-    });
+    await FileSystem.moveAsync({ from: sound.uri, to: newPath });
 
-    dispatch(addRecording({ name: recordName, uri: newPath }));
-
+    dispatch(addRecording({ name: recordName + '.m4a', uri: newPath }));
     setRecordName('');
     setSound(null);
-    loadRecordings();
   };
 
-  const playSound = async (uri) => {
+  const togglePlayback = async (uri) => {
+    if (playbackInstance) {
+      await playbackInstance.stopAsync();
+      await playbackInstance.unloadAsync();
+      setPlaybackInstance(null);
+      setIsPlaying(false);
+      if (playingUri === uri) {
+        setPlayingUri(null);
+        return;
+      }
+    }
+
     const { sound } = await Audio.Sound.createAsync({ uri });
+    setPlaybackInstance(sound);
+    setIsPlaying(true);
+    setPlayingUri(uri);
     await sound.playAsync();
+
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.didJustFinish) {
+        setIsPlaying(false);
+        setPlaybackInstance(null);
+        setPlayingUri(null);
+      }
+    });
   };
 
   const deleteRecording = async (uri) => {
     await FileSystem.deleteAsync(uri);
-    loadRecordings();
+    await loadRecordingsToRedux(dispatch);
   };
 
   return (
@@ -92,7 +102,7 @@ export default function RecordScreen() {
 
       {sound && (
         <>
-          <Button title="Écouter l'enregistrement" onPress={() => playSound(sound.uri)} />
+          <Button title="Écouter l'enregistrement" onPress={() => togglePlayback(sound.uri)} />
           <TextInput
             placeholder="Nom de l'enregistrement"
             value={recordName}
@@ -107,11 +117,12 @@ export default function RecordScreen() {
       <FlatList
         data={recordings}
         keyExtractor={(item) => item.uri}
+        ListEmptyComponent={<Text style={styles.emptyText}>Aucun enregistrement disponible</Text>}
         renderItem={({ item }) => (
           <View style={styles.recordItem}>
             <Text>{item.name}</Text>
             <View style={styles.actions}>
-              <Button title="▶️" onPress={() => playSound(item.uri)} />
+              <Button title={playingUri === item.uri && isPlaying ? '⏸️ Pause' : '▶️ Lecture'} onPress={() => togglePlayback(item.uri)} />
               <Button title="🗑️" color="red" onPress={() => deleteRecording(item.uri)} />
             </View>
           </View>
@@ -132,4 +143,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee',
   },
   actions: { flexDirection: 'row', justifyContent: 'space-between', width: 100, marginTop: 5 },
+  emptyText: {
+    textAlign: 'center',
+    color: 'gray',
+    marginTop: 20,
+    fontStyle: 'italic',
+  },
 });
