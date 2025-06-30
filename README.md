@@ -57,7 +57,7 @@ npx expo start
 ---
 
 ## Configuration du serveur de transformation audio :
----
+
 Puisqu’il est difficile de faire réaliser les calculs du modèle au téléphone directement,
 un serveur python est mis en place pour la partie calcul et renverra les clips audio
 
