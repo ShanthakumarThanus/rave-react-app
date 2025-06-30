@@ -10,13 +10,13 @@ import { useNavigation } from '@react-navigation/native';
 import { loadRecordingsToRedux } from '../../utils/loadRecordings';
 
 export default function RaveScreen() {
-  const server = useSelector((state) => state.connection);
+  const server = useSelector((state) => state.connection); // Connexion serveur
   const recordings = useSelector((state) => state.recordings.list); 
-  const [models, setModels] = useState([]);
+  const [models, setModels] = useState([]); 
   const [selectedModel, setSelectedModel] = useState(null);
   const [selectedAudio, setSelectedAudio] = useState(null);
   const [transformedUri, setTransformedUri] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Indique si un transfert est en cours
   const navigation = useNavigation();
   const isServerConfigured = server.ip && server.port; 
   const [alertShown, setAlertShown] = useState(false);
@@ -24,6 +24,7 @@ export default function RaveScreen() {
 
   const BASE_URL = `http://${server.ip}:${server.port}`;
 
+  // Alerte si la connexion serveur n’est pas configurée
   useEffect(() => {
     if ((!server.ip || !server.port) && !alertShown) {
       Alert.alert(
@@ -40,11 +41,12 @@ export default function RaveScreen() {
     }
   }, [server.ip, server.port, alertShown]);
 
+  // Chargement initial : enregistrements + modèles
   useEffect(() => {
     const setup = async () => {
       try {
-        await loadRecordingsToRedux(dispatch);
-        await fetchModels();
+        await loadRecordingsToRedux(dispatch); // Charge les fichiers locaux dans Redux
+        await fetchModels();                   // Récupère les modèles depuis le serveur
       } catch (err) {
         console.error("Erreur dans setup() : ", err);
       }
@@ -64,7 +66,7 @@ export default function RaveScreen() {
     );
   }
 
-
+  // Récupère la liste des modèles depuis le serveur
   const fetchModels = async () => {
     try {
       console.log('BASE_URL utilisé :', BASE_URL);
@@ -76,6 +78,7 @@ export default function RaveScreen() {
     }
   };
 
+  // Envoie la sélection du modèle au serveur
   const handleSelectModel = async (model) => {
     try {
       await axios.get(`${BASE_URL}/selectModel/${model}`);
@@ -85,6 +88,7 @@ export default function RaveScreen() {
     }
   };
 
+  // Permet de sélectionner un fichier audio depuis le téléphone
   const pickFileFromDevice = async () => {
     const result = await DocumentPicker.getDocumentAsync({ type: 'audio/*' });
     if (result.assets && result.assets[0]) {
@@ -125,6 +129,7 @@ export default function RaveScreen() {
     }
   };
 
+  // Lecture d’un fichier audio (original ou transformé)
   const playAudio = async (uri) => {
     const { sound } = await Audio.Sound.createAsync({ uri });
     await sound.playAsync();

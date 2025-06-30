@@ -5,6 +5,7 @@ import * as FileSystem from 'expo-file-system';
 import { useSelector, useDispatch } from 'react-redux';
 import { loadRecordingsToRedux } from '../../utils/loadRecordings';
 import { addRecording } from '../../redux/recordingsSlice';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RecordScreen() {
   const [recording, setRecording] = useState(null);
@@ -23,6 +24,7 @@ export default function RecordScreen() {
     loadRecordingsToRedux(dispatch);
   }, []);
 
+  // Lance un nouvel enregistrement audio
   const startRecording = async () => {
     try {
       await Audio.requestPermissionsAsync();
@@ -35,12 +37,13 @@ export default function RecordScreen() {
     }
   };
 
+  // Arrête et stocke temporairement l'enregistrement
   const stopRecording = async () => {
     try {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecording(null);
-      Alert.alert('Nom du clip', 'Choisis un nom ci-dessous et appuie sur Sauvegarder.');
+      Alert.alert('Nom du clip', 'Choisis un nom pour ton enregistrement et appuie sur Sauvegarder.');
       setSound({ uri });
     } catch (err) {
       console.error('Erreur arrêt enregistrement', err);
@@ -58,6 +61,7 @@ export default function RecordScreen() {
     setSound(null);
   };
 
+  // Lance ou arrête la lecture d’un enregistrement
   const togglePlayback = async (uri) => {
     if (playbackInstance) {
       await playbackInstance.stopAsync();
@@ -85,6 +89,7 @@ export default function RecordScreen() {
     });
   };
 
+  // Supprime un fichier et recharge les enregistrements
   const deleteRecording = async (uri) => {
     await FileSystem.deleteAsync(uri);
     await loadRecordingsToRedux(dispatch);
@@ -102,31 +107,44 @@ export default function RecordScreen() {
 
       {sound && (
         <>
-          <Button title="Écouter l'enregistrement" onPress={() => togglePlayback(sound.uri)} />
+          <View style={{ marginTop: 10 }}>
+            <Button title="Écouter l'enregistrement" onPress={() => togglePlayback(sound.uri)} />
+          </View>
           <TextInput
             placeholder="Nom de l'enregistrement"
             value={recordName}
             onChangeText={setRecordName}
             style={styles.input}
           />
-          <Button title="Sauvegarder" onPress={saveRecording} />
+          <Button title="Sauvegarder" onPress={saveRecording} color="#0cb032"/>
         </>
       )}
+
 
       <Text style={styles.subtitle}>Enregistrements :</Text>
       <FlatList
         data={recordings}
-        keyExtractor={(item) => item.uri}
+        keyExtractor={(item, index) => `${item.uri}-${index}`}
         ListEmptyComponent={<Text style={styles.emptyText}>Aucun enregistrement disponible</Text>}
         renderItem={({ item }) => (
-          <View style={styles.recordItem}>
-            <Text>{item.name}</Text>
-            <View style={styles.actions}>
-              <Button title={playingUri === item.uri && isPlaying ? '⏸️ Pause' : '▶️ Lecture'} onPress={() => togglePlayback(item.uri)} />
-              <Button title="🗑️" color="red" onPress={() => deleteRecording(item.uri)} />
-            </View>
-          </View>
-        )}
+      <View style={styles.recordItem}>
+        <Text>{item.name}</Text>
+        <View style={styles.iconActions}>
+          <Ionicons
+            name={playingUri === item.uri && isPlaying ? 'pause-circle' : 'play-circle'}
+            size={50}
+            color="#007AFF"
+            onPress={() => togglePlayback(item.uri)}
+          />
+          <Ionicons
+            name="trash"
+            size={50}
+            color="red"
+            onPress={() => deleteRecording(item.uri)}
+          />
+        </View>
+      </View>
+    )}
       />
     </View>
   );
@@ -148,5 +166,11 @@ const styles = StyleSheet.create({
     color: 'gray',
     marginTop: 20,
     fontStyle: 'italic',
+  },
+  iconActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    gap: 1,
+    marginTop: 5,
   },
 });

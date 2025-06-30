@@ -3,14 +3,15 @@ import { View, TextInput, Button, StyleSheet, ToastAndroid, Platform, Alert, Tex
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { setConnection } from '../../redux/connectionSlice';
-console.log('SET CONNECTION:', setConnection);
 
-
+// Écran de configuration de la connexion au serveur
 export default function HomeScreen({ navigation }) {
+  // États pour stocker l'adresse IP et le port saisis par l'utilisateur
   const [ip, setIp] = useState('');
   const [port, setPort] = useState('');
   const dispatch = useDispatch();
 
+  // Affiche un message selon la plateforme (Toast pour Android, Alert pour iOS)
   const showMessage = (msg) => {
     if (Platform.OS === 'android') {
       ToastAndroid.show(msg, ToastAndroid.SHORT);
@@ -19,6 +20,7 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  // Teste la connexion au serveur avec l'IP et le port fournis
   const testConnection = async () => {
     if (!ip || !port) {
       showMessage("Veuillez saisir l'adresse IP et le port.");
@@ -28,6 +30,7 @@ export default function HomeScreen({ navigation }) {
     try {
       const response = await axios.get(`http://${ip}:${port}/`);
       if (response.data.includes("Connection success")) {
+        // Si succès, enregistre l'IP/port dans le store Redux
         showMessage("Connexion réussie !");
         dispatch(setConnection({ ip, port }));
       } else {

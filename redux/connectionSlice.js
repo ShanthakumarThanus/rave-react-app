@@ -1,3 +1,5 @@
+// Slice Redux pour stocker l’adresse IP et le port du serveur renseignés dans l’écran d’accueil
+
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = { ip: '', port: '' };
