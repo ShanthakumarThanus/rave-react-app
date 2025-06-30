@@ -4,7 +4,7 @@ RAVE est une application mobile React Native permettant :
 
 - d’enregistrer de l’audio 🎤  
 - de sauvegarder des clips localement 💾  
-- d’envoyer un enregistrement à un serveur pour transformation via un modèle vocal IA 🔄  
+- d’envoyer un enregistrement à un serveur pour transformation 🔄  
 - d’écouter et comparer le résultat 🧠🎧
 
 Scanner ce code QR pour accéder à l'application avec Expo Go : 
