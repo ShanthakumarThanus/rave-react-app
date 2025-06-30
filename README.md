@@ -34,7 +34,7 @@ Scanner ce code QR pour accéder à l'application avec Expo Go :
 
 ---
 
-## 📦 Installation
+## 📦 Installation pour le développement local
 
 1. **Cloner le repo**
 
@@ -54,3 +54,13 @@ npx expo start
 ```
 
 4. 📱 Scanner avec l'application Expo Go pour démarrer l'application RAVE
+
+---
+
+## 📄 Licence
+
+Ce projet est sous licence MIT.
+
+## Auteur
+---
+Développé par Thanus SHANTHAKUMAR
