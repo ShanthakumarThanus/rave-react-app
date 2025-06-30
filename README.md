@@ -53,4 +53,4 @@ npm install
 npx expo start
 ```
 
-4. 📱 Scanner pour lancer l'app
+4. 📱 Scanner avec l'application Expo Go pour démarrer l'application RAVE
