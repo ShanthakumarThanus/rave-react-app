@@ -48,6 +48,9 @@ cd rave-react-app
 ```bash
 npm install
 ```
-3. **Lancer l’application avec Expo**
+3. **Lancer le serveur d'Expo Go**
+```bash
+npx expo start
+```
 
-4. ## 📱 Scanner pour lancer l'app
+4. 📱 Scanner pour lancer l'app
