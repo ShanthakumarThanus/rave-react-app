@@ -151,7 +151,7 @@ export default function RecordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, paddingTop: 40, },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
   subtitle: { fontSize: 18, marginTop: 20, marginBottom: 10 },
   input: {

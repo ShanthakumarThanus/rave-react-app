@@ -29,7 +29,7 @@ export default function RaveScreen() {
     if ((!server.ip || !server.port) && !alertShown) {
       Alert.alert(
         "Connexion requise",
-        "Veuillez d'abord renseigner l'adresse IP et le port dans l'écran d'accueil.",
+        "Veuillez renseigner l'adresse IP et le port dans l'écran d'accueil.",
         [
           {
             text: "OK",
@@ -203,7 +203,7 @@ export default function RaveScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, paddingTop: 40 },
   header: { fontSize: 18, fontWeight: 'bold', marginVertical: 10 },
   modelButton: { padding: 10 },
   model: { color: 'blue' },

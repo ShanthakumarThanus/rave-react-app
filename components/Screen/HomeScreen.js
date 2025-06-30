@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     backgroundColor: '#fff',
+    paddingTop: 40,
   },
   input: {
     borderWidth: 1,
