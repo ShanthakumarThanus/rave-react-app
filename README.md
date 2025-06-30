@@ -80,4 +80,4 @@ Ce projet est sous licence MIT.
 
 ## Auteur
 
-Développé par Thanus SHANTHAKUMAR
+Développé par Thanus SHANTHAKUMAR.
