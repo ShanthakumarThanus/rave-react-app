@@ -62,5 +62,5 @@ npx expo start
 Ce projet est sous licence MIT.
 
 ## Auteur
----
+
 Développé par Thanus SHANTHAKUMAR
