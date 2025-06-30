@@ -57,6 +57,24 @@ npx expo start
 
 ---
 
+## Configuration du serveur de transformation audio :
+---
+Puisqu’il est difficile de faire réaliser les calculs du modèle au téléphone directement,
+un serveur python est mis en place pour la partie calcul et renverra les clips audio
+
+Voici les étapes pour le configurer : 
+
+```bash
+git clone https://github.com/gnvIRCAM/RAVE-ONNX-Server.git
+cd RAVE-ONNX-Server
+pip install -r requirements.txt
+```
+Commande pour le lancer : 
+
+```bash
+python server.py
+```
+
 ## 📄 Licence
 
 Ce projet est sous licence MIT.
