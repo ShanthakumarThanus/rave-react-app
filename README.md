@@ -9,8 +9,7 @@ RAVE est une application mobile React Native permettant :
 
 Scanner ce code QR pour accéder à l'application avec Expo Go : 
 ---
-![image](https://github.com/user-attachments/assets/f6cc925a-7c78-4d87-aea0-f530229b2f2c)
-
+![image](https://github.com/user-attachments/assets/ee66f7d7-e0a5-4048-bf15-4d4597633f90)
 
 ## 🚀 Fonctionnalités
 
